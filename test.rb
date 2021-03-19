@@ -41,10 +41,7 @@ class Test < Minitest::Test
       aaa // something
       bbb
     EOL
-    expected = <<~EOL
-       
-      bbb
-    EOL
+    expected = " \nbbb\n"
     actual = remove_extend_class(s)
     assert_equal expected, actual
   end
@@ -54,9 +51,7 @@ class Test < Minitest::Test
       aaa /* something
       something2 */ bbb
     EOL
-    expected = <<~EOL
-      */ bbb
-    EOL
+    expected = " */ bbb\n"
     actual = remove_extend_class(s)
     assert_equal expected, actual
   end
