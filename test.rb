@@ -12,7 +12,7 @@ class Test < Minitest::Test
   end
 
   def test_class_names_with_single_list_of_string
-    parent_names = [%w(a b c)]
+    parent_names = [%w[a b c]]
     actual = class_names(parent_names)
     expected = "a,\nb,\nc"
     assert_equal expected, actual
@@ -20,9 +20,9 @@ class Test < Minitest::Test
 
   def test_class_names_with_several_list_of_string
     parent_names = [
-      %w(a b c),
-      %w(d e f),
-      %w(g h i),
+      %w[a b c],
+      %w[d e f],
+      %w[g h i]
     ]
     actual = class_names(parent_names)
     expected = parent_names.yield_self { |h, *t| h.product(*t) }.map(&:join).join(",\n")
@@ -41,10 +41,7 @@ class Test < Minitest::Test
       aaa // something
       bbb
     EOL
-    expected = <<~EOL
-      #{' '}
-      bbb
-    EOL
+    expected = " \nbbb\n"
     actual = remove_extend_class(s)
     assert_equal expected, actual
   end
@@ -54,9 +51,7 @@ class Test < Minitest::Test
       aaa /* something
       something2 */ bbb
     EOL
-    expected = <<~EOL
-      #{' '}*/ bbb
-    EOL
+    expected = " */ bbb\n"
     actual = remove_extend_class(s)
     assert_equal expected, actual
   end

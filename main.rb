@@ -57,8 +57,8 @@ def remove_extend_class(s)
       else
         parent_name = ''
         names = []
-        until s[i].eql?(' ') || s[i].eql?('{') || s[i].eql?('/') || s[i].eql?(nil)
-          if (s[i].eql?(','))
+        until [' ', '{', '{', nil].include?(s[i])
+          if s[i].eql?(',')
             names.append(parent_name.strip.delete('&'))
             parent_name = ''
             i += 1
@@ -89,33 +89,33 @@ def remove_extend_class(s)
     when "\n"
       if !parent_names.empty? && line.strip != ''
         style[-1] += line + "\n"
-      elsif !parent_names.empty?
-        style[0] += line + "\n"
+      else
+        style[0] = style.length.eql?(0) ? "#{line}\n" : "#{style[0]}#{line}\n"
       end
       line = ''
       i += 1
-    when "@"
-      if s[i..i + 6].eql?('@import') || s[i..i + 7].eql?('@include')
-        while (!s[i].eql?("\n") && !s[i].nil?)
+    when '@'
+      while !s[i].eql?(';') && !s[i].nil? && !s[i].eql?('{')
+        line += s[i]
+        i += 1
+      end
+      if s[i].eql?('{')
+        until s[i].eql?('}')
           line += s[i]
           i += 1
         end
-        unless s[i].eql?(nil)
-          line += s[i]
-          i += 1
-        end
-      else
-        while (!s[i].eql?('}'))
-          line += s[i]
-          i += 1
-        end
+        line += s[i]
+        i += 1
+      elsif !s[i].nil?
+        line += s[i]
+        i += 1
       end
     else
       if parent_names.length.eql?(0) && !(s[i].eql?(' ') || s[i].eql?('{') || s[i].eql?(nil))
         parent_name = ''
         names = []
         until s[i].eql?(' ') || s[i].eql?('{') || s[i].eql?('/') || s[i].eql?(nil)
-          if (s[i].eql?(','))
+          if s[i].eql?(',')
             names.append(parent_name.strip)
             parent_name = ''
             i += 1
@@ -133,11 +133,7 @@ def remove_extend_class(s)
       end
     end
   end
-  unless line.eql?('')
-    styles.append("#{style.join("")}#{line}")
-  end
-  puts line
-  puts styles
+  styles.append("#{style.join('')}#{line}")
 
   s = styles.join("\n\n")
   i = 0
@@ -148,7 +144,7 @@ def remove_extend_class(s)
     next_spaces += line.count('{')
     spaces -= line.count('}')
     next_spaces -= line.count('}')
-    line = line.length > 0 && spaces > 0 ? ' ' * spaces * 2 + line : line
+    line = !line.empty? && spaces > 0 ? ' ' * spaces * 2 + line : line
     spaces = next_spaces
     if line.count('}') > 0 && !lines[i + 1].nil? && lines[i + 1].count('}').eql?(0) && !lines[i + 1].length.eql?(0)
       line += "\n"
@@ -183,13 +179,11 @@ def main
     puts file_path
     s = remove_nest(file_path)
     styles = remove_extend_class(s)
-    #puts styles
+
     File.open(file_path, 'w') do |f|
       f.write(styles)
     end
   end
 end
 
-if File.basename(__FILE__) == File.basename($0)
-  main
-end
+main if File.basename(__FILE__).eql?(File.basename($PROGRAM_NAME))
