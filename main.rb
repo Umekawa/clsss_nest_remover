@@ -64,10 +64,10 @@ def remove_extend_class(s)
       end
     when '&'
       if ['.', ':'].include?(s[i+1])
-        line += s[i]
-        i += 1
-        line += s[i]
-        i += 1
+        until(s[i]  == '{')
+          line += s[i]
+          i += 1
+        end
       elsif [s[i+1], s[i+2]].include?('+')
         until [ '}'].include?(s[i])
           line += s[i]
@@ -88,6 +88,7 @@ def remove_extend_class(s)
             i += 1
           end
         end
+        puts parent_name if parent_name.include?('_cell')
         names.append(parent_name.strip.delete('&'))
         parent_names.append(names)
         style.append('')
