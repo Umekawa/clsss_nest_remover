@@ -215,8 +215,23 @@ def remove_nest(file_path)
   s = ''
   File.open(file_path, 'r') do |f|
     f.each_line do |line|
+      puts '~~~' if line.include?('#{')
+      puts line if line.include?('#{')
       line = line.strip.gsub('{', "{\n").gsub("\#{\n", '#{').gsub('}', "}\n")
-      s += line[-1].eql?("\n") ? line : "#{line}\n"
+      i=0
+      new_line = ''
+      k = 0
+      while line[i] != nil
+        new_line += line[i]
+        k+=1 if line[i] == '#' && line[i+1] == '{'
+        if k == 1 && line[i] == '}'
+          k -= 1
+          i+=1
+        end
+        i+=1
+      end
+      puts new_line if new_line.include?('#{')
+      s += new_line[-1].eql?("\n") ? new_line : "#{new_line}\n"
     end
   end
   s
