@@ -119,18 +119,16 @@ def remove_extend_class(s)
         i += 1
       end
       if s[i].eql?('{')
-        tmp_open = 1
-        first = true
-        until tmp_open==0
-          if s[i] == '{' && !first
+        tmp_open = 0
+        while (true)
+          if s[i] == '{'
             tmp_open+=1
-            first = false
           elsif s[i] == '}'
             tmp_open-=1
           end
           line += s[i]
           i += 1
-
+          break if tmp_open==0 && s[i-1]=='}'
         end
       elsif !s[i].nil?
         line += s[i]
@@ -142,17 +140,16 @@ def remove_extend_class(s)
         i += 1
       end
       if s[i].eql?('{')
-        tmp_open = 1
-        first = true
-        until tmp_open==0
-          if s[i] == '{' && !first
+        tmp_open = 0
+        while (true)
+          if s[i] == '{'
             tmp_open+=1
-            first = false
           elsif s[i] == '}'
             tmp_open-=1
           end
           line += s[i]
           i += 1
+          break if tmp_open==0 && s[i-1]=='}'
         end
       elsif !s[i].nil?
         line += s[i]
