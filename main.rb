@@ -159,7 +159,7 @@ def remove_extend_class(s)
         i += 1
       end
     else
-      if parent_names.length != 0 && s[i] == '.' && !(s[i+1] =~ /\A[0-9]+\z/) && !line.include?('>') && !line.include?('image: ')
+      if parent_names.length != 0 && s[i] == '.' && !(s[i+1] =~ /\A[0-9]+\z/) && !line.include?('>') && !line.include?('image: ')  && !line.include?('background: ') 
         tmp_open = 0
         while (true)
           if s[i] == '{'
