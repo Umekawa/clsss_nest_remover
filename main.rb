@@ -63,7 +63,7 @@ def remove_extend_class(s)
         open_num += 1
       end
     when '&'
-      if ['.', ':'].include?(s[i+1])
+      if ['.', ':', '['].include?(s[i+1])
         until(s[i]  == '{')
           line += s[i]
           i += 1
