@@ -66,6 +66,8 @@ def remove_extend_class(s)
       if ['.', ':'].include?(s[i+1])
         line += s[i]
         i += 1
+        line += s[i]
+        i += 1
       elsif [s[i+1], s[i+2]].include?('+')
         until [ '}'].include?(s[i])
           line += s[i]
@@ -215,8 +217,6 @@ def remove_nest(file_path)
   s = ''
   File.open(file_path, 'r') do |f|
     f.each_line do |line|
-      puts '~~~' if line.include?('#{')
-      puts line if line.include?('#{')
       line = line.strip.gsub('{', "{\n").gsub("\#{\n", '#{').gsub('}', "}\n")
       i=0
       new_line = ''
@@ -230,7 +230,6 @@ def remove_nest(file_path)
         end
         i+=1
       end
-      puts new_line if new_line.include?('#{')
       s += new_line[-1].eql?("\n") ? new_line : "#{new_line}\n"
     end
   end
