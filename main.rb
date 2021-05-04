@@ -34,12 +34,12 @@ def remove_extend_class(s)
     when '/'
       if s[i + 1].eql?('/')
         until s[i].eql?("\n") || s[i].eql?(nil)
-          # line += s[i] コメントがおかしい場所に出るので出さないようにしてます
+          line += s[i]
           i += 1
         end
       elsif s[i + 1].eql?('*')
         until s[i].eql?('*') && s[i + 1].eql?('/')
-          # line += s[i] コメントがおかしい場所に出るので出さないようにしてます
+          line += s[i]
           i += 1
         end
       else
@@ -49,9 +49,28 @@ def remove_extend_class(s)
     when '{'
       line += '{'
       i += 1
-      open_num += 1
+      if s[i-2] == '#'
+        until [ '}'].include?(s[i])
+          line += s[i]
+          i += 1
+        end
+        line += s[i]
+        i += 1
+        while s[i] == "\n"
+          i+=1
+        end
+      else
+        open_num += 1
+      end
     when '&'
-      if s[i + 1].eql?(':')
+      if ['.', ':'].include?(s[i+1])
+        line += s[i]
+        i += 1
+      elsif [s[i+1], s[i+2]].include?('+')
+        until [ '}'].include?(s[i])
+          line += s[i]
+          i += 1
+        end
         line += s[i]
         i += 1
       else
@@ -100,21 +119,63 @@ def remove_extend_class(s)
         i += 1
       end
       if s[i].eql?('{')
-        until s[i].eql?('}')
+        tmp_open = 1
+        first = true
+        until tmp_open==0
+          if s[i] == '{' && !first
+            tmp_open+=1
+            first = false
+          elsif s[i] == '}'
+            tmp_open-=1
+          end
+          line += s[i]
+          i += 1
+
+        end
+      elsif !s[i].nil?
+        line += s[i]
+        i += 1
+      end
+    when '$'
+      while !s[i].eql?(';') && !s[i].nil? && !s[i].eql?('{')
+        line += s[i]
+        i += 1
+      end
+      if s[i].eql?('{')
+        tmp_open = 1
+        first = true
+        until tmp_open==0
+          if s[i] == '{' && !first
+            tmp_open+=1
+            first = false
+          elsif s[i] == '}'
+            tmp_open-=1
+          end
           line += s[i]
           i += 1
         end
-        line += s[i]
-        i += 1
       elsif !s[i].nil?
         line += s[i]
         i += 1
       end
     else
-      if parent_names.length.eql?(0) && !(s[i].eql?(' ') || s[i].eql?('{') || s[i].eql?(nil))
+      if parent_names.length != 0 && s[i] == '.' && !(s[i+1] =~ /\A[0-9]+\z/) && !line.include?('>') && !line.include?('image: ')
+        tmp_open = 0
+        while (true)
+          if s[i] == '{'
+            tmp_open+=1
+          elsif s[i] == '}'
+            tmp_open-=1
+          end
+          line += s[i]
+          i += 1
+          break if tmp_open==0 && s[i-1]=='}'
+        end
+        line=(remove_extend_class(line)) if line != ''
+      elsif parent_names.length.eql?(0) && ![' ', '{', nil].include?(s[i])
         parent_name = ''
         names = []
-        until s[i].eql?(' ') || s[i].eql?('{') || s[i].eql?('/') || s[i].eql?(nil)
+        until [' ', '{', '/', nil].include?(s[i])
           if s[i].eql?(',')
             names.append(parent_name.strip)
             parent_name = ''
@@ -125,8 +186,8 @@ def remove_extend_class(s)
             style.append('')
           end
         end
-        names.append(parent_name.strip)
-        parent_names.append(names)
+          names.append(parent_name.strip)
+          parent_names.append(names)
       else
         line += s[i]
         i += 1
@@ -157,7 +218,7 @@ def remove_nest(file_path)
   s = ''
   File.open(file_path, 'r') do |f|
     f.each_line do |line|
-      line = line.strip.gsub('{', "{\n").gsub('}', "}\n")
+      line = line.strip.gsub('{', "{\n").gsub("\#{\n", '#{').gsub('}', "}\n")
       s += line[-1].eql?("\n") ? line : "#{line}\n"
     end
   end
